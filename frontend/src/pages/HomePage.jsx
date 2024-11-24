@@ -15,9 +15,13 @@ const HomePage = () => {
 
   const apiCall = async () => {
     try {
-      const responseMongo = await axios.get("http://localhost:4000/mongodb");
+      const responseMongo = await axios.get(
+        "https://chart-visualizer-mern.onrender.com/mongodb"
+      );
       setMongodbData(responseMongo.data[0] || {});
-      const responseSql = await axios.get("http://localhost:4000/mysql");
+      const responseSql = await axios.get(
+        "https://chart-visualizer-mern.onrender.com/mysql"
+      );
       setSqlData(responseSql.data || []);
       setError(false);
     } catch (err) {
