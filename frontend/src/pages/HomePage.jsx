@@ -12,16 +12,14 @@ const HomePage = () => {
   const [range, setRange] = useState(0);
   const [dataType, setDataType] = useState("monthlySales");
   const [chartType, setChartType] = useState("line");
+  const [provider, setProvider] = useState("mysql"); 
+  const [newData, setNewData] = useState(""); 
 
   const apiCall = async () => {
     try {
-      const responseMongo = await axios.get(
-        "https://chart-visualizer-mern.onrender.com/mongodb"
-      );
+      const responseMongo = await axios.get("http://localhost:4000/mongodb");
       setMongodbData(responseMongo.data[0] || {});
-      const responseSql = await axios.get(
-        "https://chart-visualizer-mern.onrender.com/mysql"
-      );
+      const responseSql = await axios.get("http://localhost:4000/mysql");
       setSqlData(responseSql.data || []);
       setError(false);
     } catch (err) {
@@ -40,6 +38,37 @@ const HomePage = () => {
 
   const handleChartTypeChange = (e) => {
     setChartType(e.target.value);
+  };
+
+  const handleProviderChange = (e) => {
+    setProvider(e.target.value);
+  };
+
+  const handleInputChange = (e) => {
+    setNewData(e.target.value);
+  };
+
+  const submitHandler = async () => {
+    if (!newData) {
+      alert("Please enter data before submitting.");
+      return;
+    }
+
+    const endpoint =
+      provider === "mysql"
+        ? "http://localhost:4000/mysql/insert"
+        : "http://localhost:4000/mongodb/insert";
+
+    try {
+      const parsedData = JSON.parse(newData);
+      await axios.post(endpoint, parsedData);
+      alert("Data submitted successfully!");
+      setNewData("");
+      apiCall();
+    } catch (err) {
+      console.error("Error submitting data:", err);
+      alert("Failed to submit data. Please check your input.");
+    }
   };
 
   const renderChart = (data) => {
@@ -69,8 +98,34 @@ const HomePage = () => {
         </p>
       ) : (
         <>
-          {/* Range input */}
-          <div className="mb-6 text-center">
+          <div className="mb-6 flex flex-col items-center justify-center gap-3">
+            <input
+              type="text"
+              placeholder="Insert new Data (JSON)"
+              value={newData}
+              onChange={handleInputChange}
+              className="shadow-md p-3 outline-none border-2 border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-500"
+            />
+
+            <div className="flex gap-4">
+              {/* Dropdown for data provider */}
+              <select
+                value={provider}
+                onChange={handleProviderChange}
+                className="p-3 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="mysql">MySQL</option>
+                <option value="mongodb">MongoDB</option>
+              </select>
+
+              <button
+                className="shadow-xl p-2 font-bold rounded-md bg-indigo-500 text-white"
+                onClick={submitHandler}
+              >
+                Submit
+              </button>
+            </div>
+
             <input
               type="number"
               placeholder="Enter a range"

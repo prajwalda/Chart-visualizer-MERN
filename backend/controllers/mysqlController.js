@@ -3,31 +3,66 @@ const salesData = require("../data/salesData");
 
 const insertMySQLData = async (req, res) => {
   try {
-    const data = req.body || salesData;
+    const data = req.body;
 
-    //  Product Sales
-    const productQuery = "INSERT INTO product_sales (product, sales) VALUES ?";
-    const productValues = data.productSales.map((item) => [item.product, item.sales]);
-    await sqlDb.query(productQuery, [productValues]);
+    if (data.productSales) {
+      const productQuery = `
+        INSERT INTO product_sales (product, sales)
+        VALUES ?
+        ON DUPLICATE KEY UPDATE sales = VALUES(sales)
+      `;
+      const productValues = data.productSales.map((item) => [
+        item.product,
+        item.sales,
+      ]);
+      await sqlDb.query(productQuery, [productValues]);
+    }
 
-    //  Monthly Sales
-    const monthlyQuery = "INSERT INTO monthly_sales (month, sales) VALUES ?";
-    const monthlyValues = data.monthlySales.map((item) => [item.month, item.sales]);
-    await sqlDb.query(monthlyQuery, [monthlyValues]);
+    if (data.monthlySales) {
+      const monthlyQuery = `
+        INSERT INTO monthly_sales (month, sales)
+        VALUES ?
+        ON DUPLICATE KEY UPDATE sales = VALUES(sales)
+      `;
+      const monthlyValues = data.monthlySales.map((item) => [
+        item.month,
+        item.sales,
+      ]);
+      await sqlDb.query(monthlyQuery, [monthlyValues]);
+    }
 
-    //  Regional Sales
-    const regionalQuery = "INSERT INTO regional_sales (region, sales) VALUES ?";
-    const regionalValues = data.regionalSales.map((item) => [item.region, item.sales]);
-    await sqlDb.query(regionalQuery, [regionalValues]);
+    if (data.regionalSales) {
+      const regionalQuery = `
+        INSERT INTO regional_sales (region, sales)
+        VALUES ?
+        ON DUPLICATE KEY UPDATE sales = VALUES(sales)
+      `;
+      const regionalValues = data.regionalSales.map((item) => [
+        item.region,
+        item.sales,
+      ]);
+      await sqlDb.query(regionalQuery, [regionalValues]);
+    }
 
-    //  Weekly Sales
-    const weeklyQuery = "INSERT INTO weekly_sales (week, sales) VALUES ?";
-    const weeklyValues = data.weeklySales.map((item) => [item.week, item.sales]);
-    await sqlDb.query(weeklyQuery, [weeklyValues]);
+    if (data.weeklySales) {
+      const weeklyQuery = `
+        INSERT INTO weekly_sales (week, sales)
+        VALUES ?
+        ON DUPLICATE KEY UPDATE sales = VALUES(sales)
+      `;
+      const weeklyValues = data.weeklySales.map((item) => [
+        item.week,
+        item.sales,
+      ]);
+      await sqlDb.query(weeklyQuery, [weeklyValues]);
+    }
 
-    res.status(201).send({ message: "Data inserted into MySQL!" });
+    res.status(201).send({ message: "Data inserted/updated into MySQL!" });
   } catch (error) {
-    res.status(500).send({ message: "Error inserting MySQL data", error });
+    console.error("Error inserting/updating data:", error);
+    res
+      .status(500)
+      .send({ message: "Error inserting/updating MySQL data", error });
   }
 };
 
